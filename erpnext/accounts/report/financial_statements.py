@@ -102,7 +102,7 @@ def calculate_values(accounts, gl_entries_by_account, period_list):
 					# check if posting date is within the period
 					if entry.posting_date <= period.to_date:
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
-
+							break
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
@@ -140,6 +140,7 @@ def prepare_data(accounts, balance_must_be, period_list):
 				has_value = True
 
 		if has_value:
+			row["total"]=total_column
 			out.append(row)
 
 	return out
@@ -152,7 +153,9 @@ def add_total_row(out, balance_must_be, period_list):
 	for period in period_list:
 		row[period.key] = out[0].get(period.key, 0.0)
 		out[0][period.key] = ""
-
+		out[0]["total"]=""
+		
+	row["total"]=total_column
 	out.append(row)
 
 	# blank row after Total
@@ -234,7 +237,7 @@ def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closi
 
 	return gl_entries_by_account
 
-def get_columns(period_list):
+def get_columns(periodicity,period_list):
 	columns = [{
 		"fieldname": "account",
 		"label": _("Account"),
@@ -249,5 +252,11 @@ def get_columns(period_list):
 			"fieldtype": "Currency",
 			"width": 150
 		})
-
+        if periodicity!="Yearly":
+		columns.append({
+			"fieldname": "total",
+			"label": _("Total"),
+			"fieldtype": "Currency",
+			"width": 150
+		})
 	return columns
